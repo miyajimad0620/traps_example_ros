@@ -1,0 +1,37 @@
+<launch>
+  <arg name="namespace" default=""/>
+  <arg name="use_sim_time" default="false"/>
+  <arg name="params_file" default="$(find-pkg-share traps_example_ros)/config/params/example.yaml"/>
+  <arg name="use_composition" default="true"/>
+  <arg name="respawn" default="true"/>
+  <arg name="log_level" default="info"/>
+  <arg name="multithread" default="false"/>
+  <let name="multithread_arg" value="" unless="$(var multithread)"/>
+  <let name="multithread_arg" value="--use_multi_threaded_executor" if="$(var multithread)"/>
+  <arg name="local_tf" default="true"/>
+  <let name="remapped_tf" value="tf" if="$(var local_tf)"/>
+  <let name="remapped_tf" value="/tf" unless="$(var local_tf)"/>
+
+  <group unless="$(var use_composition)">
+    <node pkg="traps_example_ros" exec="example_pub_node"
+      name="example_pub_node" namespace="$(var namespace)" respawn="$(var respawn)" args="$(var multithread_arg) --ros-args --log-level $(var log_level)">
+      <param name="use_sim_time" value="$(var use_sim_time)" />
+    </node>
+    <node pkg="traps_example_ros" exec="example_sub_node"
+      name="example_sub_node" namespace="$(var namespace)" respawn="$(var respawn)" args="$(var multithread_arg) --ros-args --log-level $(var log_level)">
+      <param name="use_sim_time" value="$(var use_sim_time)" />
+    </node>
+  </group>
+
+  <node_container if="$(var use_composition)" pkg="rclcpp_components" exec="component_container_isolated"
+    name="example_container" namespace="$(var namespace)" respawn="$(var respawn)" args="$(var multithread_arg) --ros-args --log-level $(var log_level)">
+    <composable_node pkg="traps_example_ros" plugin="traps_example_ros::ExamplePubNode" name="example" namespace="$(var namespace)">
+      <param name="use_sim_time" value="$(var use_sim_time)" />
+      <extra_arg name="use_intra_process_comms" value="true" />
+    </composable_node>
+    <composable_node pkg="traps_example_ros" plugin="traps_example_ros::ExampleSubNode" name="example" namespace="$(var namespace)">
+      <param name="use_sim_time" value="$(var use_sim_time)" />
+      <extra_arg name="use_intra_process_comms" value="true" />
+    </composable_node>
+  </node_container>
+</launch>

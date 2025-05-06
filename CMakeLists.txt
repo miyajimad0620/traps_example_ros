@@ -64,7 +64,15 @@ endif()
 # ノードプラグインの設定
 rclcpp_components_register_node("${PROJECT_NAME}_lib"
   PLUGIN "${PROJECT_NAME}::ExampleNode"
-  EXECUTABLE ${node_plugin}_node)
+  EXECUTABLE example_node)
+
+rclcpp_components_register_node("${PROJECT_NAME}_lib"
+  PLUGIN "${PROJECT_NAME}::ExamplePubNode"
+  EXECUTABLE example_pub_node)
+
+rclcpp_components_register_node("${PROJECT_NAME}_lib"
+  PLUGIN "${PROJECT_NAME}::ExampleSubNode"
+  EXECUTABLE example_sub_node)
 
 # ディレクトリのinstall
 set(install_directories config;launch;${${PROJECT_NAME_UPPER}_INSTALL_DIRECTORIES})
